@@ -1,18 +1,21 @@
 <template>
     <div class="maxContainer sm:w-[80%] w-full h-full xl:pt-8 pt-3 flex flex-col justify-end xl:space-y-12 space-y-10">
         <div class="sm:max-w-[600px] w-full mx-auto p-6 flex flex-col justify-center items-center gap-3 sm:rounded-xl bg-white">
-            <div class="p-3 rounded-full bg-gray-200">
-                <div class="p-0.5 rounded-full bg-black">
-                    <div class="p-1 bg-white rounded-full">
-                        <div class="p-1 bg-black rounded-full"></div>
-                    </div>
+            <!-- Dynamic Icon -->
+            <div class="p-3 rounded-full bg-gray-200 flex items-center justify-center">
+                <div v-if="isRecording" class="p-4 bg-black rounded-full flex items-center justify-center">
+                    <div class="w-4 h-4 bg-white"></div> <!-- Stop Icon -->
+                </div>
+                <div v-else class="p-4 bg-black rounded-full flex items-center justify-center">
+                    <div class="w-0 h-0 border-l-8 border-t-4 border-b-4 border-transparent border-l-white"></div> <!-- Play Icon -->
                 </div>
             </div>
+            
             <div class="max-w-[250px] mx-auto space-y-4">
                 <p class="text-lg text-center font-medium">
                     Transcribing and detecting Bible quotations in real time
                 </p>
-
+                
                 <!-- Start Listening Button -->
                 <div 
                     v-if="!isRecording"
@@ -70,7 +73,6 @@ export default {
                     const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
                     const audioUrl = URL.createObjectURL(audioBlob);
                     console.log("Recording saved:", audioUrl);
-                    // You can upload or play the audio here
                 };
 
                 this.mediaRecorder.start();
