@@ -42,18 +42,28 @@
                     <span>Stop Listening</span>
                 </div>
             </div>
+
+            <!-- Display Bible Verse and Quotation -->
+            <div v-if="bibleVerse" class="mt-6 p-4 bg-gray-100 rounded-lg">
+                <p class="text-lg font-semibold">Bible Verse: {{ bibleVerse }}</p>
+                <p class="mt-2 text-gray-700">{{ bibleQuotation }}</p>
+            </div>
         </div>
     </div>
 </template>
 
 <script>
+import axios from 'axios'; // Import axios
+
 export default {
-    name: 'starting',
+    name: 'Starting',
     data() {
         return {
             isRecording: false,
             mediaRecorder: null,
-            audioChunks: []
+            audioChunks: [],
+            bibleVerse: null,
+            bibleQuotation: null
         };
     },
     methods: {
@@ -69,10 +79,9 @@ export default {
                     }
                 };
 
-                this.mediaRecorder.onstop = () => {
+                this.mediaRecorder.onstop = async () => {
                     const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
-                    const audioUrl = URL.createObjectURL(audioBlob);
-                    console.log("Recording saved:", audioUrl);
+                    await this.sendAudioToServer(audioBlob);
                 };
 
                 this.mediaRecorder.start();
@@ -85,6 +94,25 @@ export default {
             if (this.mediaRecorder && this.isRecording) {
                 this.mediaRecorder.stop();
                 this.isRecording = false;
+            }
+        },
+        async sendAudioToServer(audioBlob) {
+            const formData = new FormData();
+            formData.append('audio_file', audioBlob, 'recording.webm');
+
+            try {
+                const response = await axios.post('http://localhost:8000/transcribe-and-quote/', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data' // Ensure proper content type for file upload
+                    }
+                });
+
+                if (response.data) {
+                    this.bibleVerse = response.data.quote_address || 'No verse detected';
+                    this.bibleQuotation = response.data.quote || 'No quotation found';
+                }
+            } catch (error) {
+                console.error('Error sending audio to server:', error);
             }
         }
     }
